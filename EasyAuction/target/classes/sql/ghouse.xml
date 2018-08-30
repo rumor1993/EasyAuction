@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="GHOUSE1">
+    <insert id="insertGhouse" parameterType="ghouse">
+    	insert into ea_ghouse values(
+    		ghouse_seq.nextval, #{eb_boardnum}, #{eb_itemnum},
+    		#{gh_buyer}, #{gh_bidprice}, sysdate
+    	)
+    </insert>
+    
+    <select id="getGhouse" parameterType="String" resultType="ghouse">
+    		select * from 
+    	(select * from ea_ghouse where eb_itemnum = #{eb_itemnum} order by gh_biddate)
+    	order by gh_bidprice desc
+    </select>
+    
+</mapper>
+
+
+
+
+
+
+
+

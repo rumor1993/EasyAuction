@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SHOUSE1">
+    
+    <insert id="price_insert" parameterType="shouse">
+    	insert into EA_SHOUSE
+    		(sh_num, sh_bidnum, esl_num, eb_itemnum, eb_itemname, sh_adkey,
+    		sh_comment, sh_buyer, sh_bidprice, sh_biddate)
+    	values
+    		(ea_shouse_seq.nextval, #{sh_bidnum}, #{esl_num}, #{eb_itemnum}, #{eb_itemname},
+    		#{sh_adkey}, #{sh_comment}, #{sh_buyer}, #{sh_bidprice}, sysdate)
+    </insert>
+    
+    <select id="comment_list" parameterType="shouse" resultType="shouse">
+    	select * from EA_SHOUSE 
+    		where sh_buyer = #{sh_buyer} and sh_bidnum=#{sh_bidnum} and eb_itemnum = #{eb_itemnum}
+    		 order by sh_biddate asc
+    </select>
+    
+    <select id="current_price" parameterType="shouse" resultType="shouse">
+    	select * from(
+			select rownum rnum, sh_num, sh_bidnum, esl_num, eb_itemnum, eb_itemname,
+				sh_buyer, sh_bidprice, sh_adkey, sh_comment, sh_biddate
+			from EA_SHOUSE where sh_bidprice = (select max(sh_bidprice) from EA_SHOUSE where sh_buyer not in('admin'))
+				and sh_buyer not in('admin') and sh_bidnum = #{sh_bidnum} and eb_itemnum = #{eb_itemnum}
+			order by sh_biddate asc) 
+			where rnum = 1
+    </select>
+    
+    <select id="select_bidcount" parameterType="shouse" resultType="shouse">
+    	select * from EA_SHOUSE
+    		where sh_bidnum = #{sh_bidnum} and eb_itemnum = #{eb_itemnum}
+    			and sh_buyer = 'admin' and sh_bidprice = #{sh_bidprice}
+    			and sh_adkey not in ('입장', '미응찰', '중단')
+    </select>
+    
+    <update id="add_bidcount" parameterType="shouse">
+    	update EA_SHOUSE
+    		set sh_bidcount = (#{sh_bidcount})
+    		where eb_itemnum = #{eb_itemnum} and sh_bidnum = #{sh_bidnum}
+    			and sh_buyer = 'admin' and sh_bidprice = #{sh_bidprice}
+    </update>
+    
+    <select id="select_commentinfo" parameterType="shouse" resultType="shouse">
+    	select * from EA_SHOUSE
+    		where sh_bidnum = #{sh_bidnum} and eb_itemnum = #{eb_itemnum}
+    			and sh_adkey = #{sh_adkey}
+    </select>
+    
+    <update id="edit_adkey" parameterType="shouse">
+    	update EA_SHOUSE
+    		set sh_adkey = #{sh_adkey}, sh_biddate = sysdate
+    		where eb_itemnum = #{eb_itemnum} and sh_bidnum = #{sh_bidnum}
+    			and sh_buyer = 'admin' and sh_adkey = '미응찰' and sh_bidprice = #{sh_bidprice}
+    </update>
+    
+    <select id="select_houseinfo" parameterType="String" resultType="shlist">
+    	select * from ES_HOUSELIST where eb_itemnum = #{itemnum}
+    </select>
+    
+    <insert id="insert_houseinfo" parameterType="shlist">
+    	insert into ES_HOUSELIST
+    		values(es_houselist_seq.nextval, #{sh_bidnum}, #{eb_boardnum}
+    			#{eb_itemnum}, #{eb_itemname}, #{esl_count}, sysdate)
+    </insert>
+    
+    <update id="update_housecount" parameterType="shlist">
+    	update ES_HOUSELIST 
+    		set esl_count = #{esl_count}
+    		where eb_itemnum = #{eb_itemnum} and sh_bidnum = #{sh_bidnum}
+    </update>
+    
+    <update id="insert_specialauction_laprice" parameterType="board">
+    	update ea_board
+    		set eb_laprice = #{eb_laprice}
+    		where eb_itemnum = #{eb_itemnum}
+    </update>
+    
+    <select id="select_boardInfo" parameterType="String" resultType="board">
+    	select * from ea_board where eb_itemnum = #{eb_itemnum}
+    </select>
+    
+    <select id="view_userpoint" parameterType="String" resultType="member">
+    	select * from ea_member where em_id = #{em_id}
+    </select>
+    
+    <select id="get_SHouseList" resultType="shlist">
+    	select * from ES_HOUSELIST
+    	order by sh_bidnum
+    </select>
+    
+    <update id="SHouse_update" parameterType="shlist">
+    	update ES_HOUSELIST
+    	set eb_itemnum = #{eb_itemnum},
+    		eb_itemname = #{eb_itemname},
+    		eb_stprice = #{eb_stprice}
+    	where sh_bidnum = #{sh_bidnum} and
+    	esl_date = to_date(#{esl_date}, 'YYYY-MM-DD HH24:MI')
+    </update>
+    
+    <update id="reverify" parameterType="String">
+    	update ES_HOUSELIST
+    	set eb_itemnum = ''
+    	where eb_itemnum = #{eb_itemnum}
+    </update> 
+</mapper>
+
+
+
+
+
+
+
+

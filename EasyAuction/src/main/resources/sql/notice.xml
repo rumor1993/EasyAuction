@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="NOTICE1">
+	<!-- 총 게시물 수 -->
+	<select id="notice_listCount" resultType="int">
+		select count(*) from ea_notice
+	</select>
+	
+	<!-- 글 등록 -->
+    <insert id="notice_insert" parameterType="notice">
+ 	insert into ea_notice
+ 	(EN_NUM, EN_ADMIN, EN_SUB, EN_CONT,
+ 	 EN_HIT, EN_FILE, EN_ORIGINAL, EN_DATE)
+ 	 values
+ 	 (ea_notice_seq.nextval, #{en_admin}, #{en_sub}, #{en_cont},
+ 		0, #{en_file, jdbcType=VARCHAR}, #{en_original, jdbcType=VARCHAR}, sysdate)  
+    </insert>
+    
+    <!-- 리스트 출력 -->
+    <select id="notice_getList" parameterType="Map" resultType="notice">
+    <![CDATA[
+    	select * from 
+    	(select rownum rnum, EN_NUM, EN_ADMIN, en_sub, en_cont,
+    		en_hit, en_file, en_original, substr(en_date, 1, 11) as en_date
+    		from (select * from EA_NOTICE
+    			order by en_num desc))
+    	where rnum >= ((#{page} - 1) * #{limit} + 1)
+			and rnum <= (#{page} * #{limit})
+			order by EN_NUM desc
+    ]]>
+    </select>
+    
+    <!-- 방문자 수 추가 -->
+    <update id="notice_hit" parameterType="int">
+    	update ea_notice
+    	set en_hit=en_hit+1
+    	where en_num=#{en_num}
+    </update>
+    
+    <!-- 내용 보기 -->
+    <select id="notice_cont" parameterType="int" resultType="notice">
+     select * from ea_notice where en_num=#{en_num}
+    </select>
+    
+    <!-- 내용 수정 -->
+    <update id="notice_edit" parameterType="notice">
+    <![CDATA[
+    update ea_notice
+    set en_sub = #{en_sub}, en_cont =#{en_cont},
+    	en_file = #{en_file}, en_original=#{en_original}
+    where en_num = #{en_num}
+    ]]>
+    </update>
+    
+    <!-- 게시물 삭제 -->
+    <delete id="notice_delete" parameterType="int">
+     delete from ea_notice
+     where en_num = #{en_num}
+    </delete>
+  	
+  	<!-- 검색 리스트 수 -->
+    <select id="noticefind_cnt" parameterType="java.util.Map" resultType="int">
+    	select count(*) from ea_notice
+    	
+    	<where>
+			<!-- 검색 조건이 없는 경우 -->
+			<if test="find_field == ''">
+			</if>
+			<if test="find_field == 'notice_name'">
+				en_admin like #{find_name}
+			</if>
+			<if test="find_field == 'notice_subject'">
+				en_sub like #{find_name}
+			</if>
+			<if test="find_field == 'notice_content'">
+				en_cont like #{find_name}
+			</if>
+		</where>
+    </select>
+  	
+  	<!-- 검색 후 리스트 -->
+    <select id="noticefind_list" parameterType="java.util.Map" resultType="notice">
+    	select *
+    	from
+    	 (select rownum rnum, en_num, en_admin, en_sub, en_cont,
+    		en_hit, en_file, en_original, en_date
+    		from (select * from ea_notice
+    	<where>
+			<!-- 검색 조건이 없는 경우 -->
+			<if test="find_field == ''">
+			</if>
+			<if test="find_field == 'notice_name'">
+				en_admin like #{find_name}
+			</if>
+			<if test="find_field == 'notice_subject'">
+				en_sub like #{find_name}
+			</if>
+			<if test="find_field == 'notice_content'">
+				en_cont like #{find_name}
+			</if>
+		</where>
+		<![CDATA[				
+				order by en_num desc))
+    	where rnum >= ((#{page} - 1) * #{limit} + 1)
+			and rnum <= (#{page} * #{limit})
+			order by EN_NUM desc
+		]]>
+    </select>  
+</mapper>
+
+
+
+
+
+
+
+

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SLIST1">
+
+	<insert id="insertSlist" parameterType="slist">
+    	insert into ea_slist values(
+    		slist_seq.nextval , #{es_kind}, #{es_user}, #{es_buyer},
+    		#{eb_boardnum}, #{eb_itemnum}, #{eb_itemname}, #{eb_file},
+    		#{es_price}, sysdate
+    	)
+    </insert>
+	
+</mapper>
+
+
+
+
+
+
+
+

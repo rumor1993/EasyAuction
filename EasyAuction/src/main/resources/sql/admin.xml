@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ADMIN1">
+
+	<select id="list_reviewlatest" resultType="review">
+		select * from
+			(select rownum rnum, er_num, em_id, er_pass, er_kind,
+				er_itemnum, er_itemname, er_sub, er_cont, er_hit,
+				er_file, er_original, er_date from 
+					(select * from ea_reply order by er_date desc))
+		where rnum between 1 and 4
+	</select>
+	
+	<select id="list_specialdeadline" resultType="board">
+		select * from 
+			(select rownum rnum, eb_itemnum, eb_boardnum, em_id, eb_state, 
+				eb_itemname, eb_cont, eb_drprice, eb_stprice, eb_laprice, eb_madein,
+				ey_categorynum, eb_bidcount, eb_attcount, eb_file, eb_original, eb_hit, 
+				eb_audate, eb_stdate, eb_saledate, eb_ladate, eb_choicedate from 
+				(select * from ea_board where substr(eb_itemnum, 1, 2) = 'SP' 
+						and substr(eb_audate, 1, 10) = substr(sysdate, 1, 10)
+						and (eb_state = '금일오픈' or eb_state = '오픈')
+					order by eb_audate)) 
+	</select>
+	
+	<select id="list_commondeadline" resultType="board">
+		select * from 
+			(select rownum rnum, eb_itemnum, eb_boardnum, em_id, eb_kind, eb_state, 
+				eb_itemname, eb_cont, eb_drprice, eb_stprice, eb_laprice, eb_madein,
+				ey_categorynum, eb_bidcount, eb_attcount, eb_file, eb_original, eb_hit, 
+				eb_audate, eb_stdate, eb_saledate, eb_ladate, eb_choicedate from 
+				(select * from ea_board where eb_kind = '일반' order by eb_ladate desc)) 
+		where rnum between 1 and 4
+	</select>
+	
+	<select id="list_commonpopularity" resultType="board">
+		select * from 
+			(select rownum rnum, eb_itemnum, eb_boardnum, em_id, eb_kind, eb_state, 
+				eb_itemname, eb_cont, eb_drprice, eb_stprice, eb_laprice, eb_madein,
+				ey_categorynum, eb_bidcount, eb_attcount, eb_file, eb_original, eb_hit, 
+				eb_audate, eb_stdate, eb_saledate, eb_ladate, eb_choicedate from 
+				(select * from ea_board where eb_kind = '일반' order by eb_bidcount desc)) 
+		where rnum between 1 and 4
+	</select>
+
+    <select id="list_memberinfo" resultType="member">
+    	select * from ea_member order by em_date desc
+    </select>
+    
+    <select id="member_usage" resultType="hashmap">
+    	select month, count(month) as count from 
+			(select substr(em_date, 4, 2) as month from ea_member)
+				group by month order by month
+    </select>
+    
+    <select id="board_regcount" parameterType="String" resultType="hashmap">
+    	select month, count(month) as count from
+    		(select substr(eb_stdate, 4, 2) as month from ea_board
+    			where substr(eb_itemnum, 1, 2) = #{itemnum})
+    			group by month order by month
+    </select>
+    
+    <select id="board_regcate" parameterType="String" resultType="hashmap">
+    	select category, count(num) as count from
+			(select ea_category.ey_bigcategory as category, ea_board.ey_categorynum as num 
+				from ea_board full outer join ea_category on ea_board.ey_categorynum = ea_category.ey_categorynum
+				where substr(eb_itemnum, 1, 2) = #{itemnum})
+				group by category order by category
+    </select>
+    
+    <select id="list_useraccountinfo" parameterType="String" resultType="point">
+    	select * from ea_point where eg_id = #{eg_id} and eg_state = '대기'
+    </select>
+    
+    <select id="count_message" parameterType="String" resultType="int">
+    	select count(*) from ea_point where eg_id = #{eg_id} and eg_state = '대기'
+    </select>
+    
+    <update id="edit_useraccountinfo" parameterType="point">
+    	update ea_point 
+    		set eg_state = '완료',
+    			 eg_date = sysdate
+    			where eg_num = #{eg_num} and eg_id = #{eg_id}
+    </update>
+    
+    <update id="deposit_useraccount" parameterType="point">
+    	update ea_member set em_point = em_point + #{eg_recoin}
+    		where em_id = #{eg_id}
+    </update>
+    
+    <update id="withdraw_useraccount" parameterType="point">
+    	update ea_member set em_point = em_point - #{eg_recoin}
+    		where em_id = #{eg_id}
+    </update>
+    
+    <select id="count_plist_bidcancel" parameterType="String" resultType="int">
+    	select count(*) from ea_plist where ep_user = #{ep_user} and ep_result = '취소대기'
+    </select>
+    
+    <select id="list_plist_bidcancel" parameterType="String" resultType="cancel">
+    	select * from ea_cancel c full outer join ea_plist p 
+    		on c.eb_itemnum = p.eb_itemnum
+    		where p.ep_user = #{ep_user} and p.ep_result = '취소대기'
+    </select>
+    
+    
+   	<update id="update_plist_result" parameterType="plist">
+   		update ea_plist
+   			set ep_result = '취소완료'
+   			where ep_user = #{ep_user} and eb_itemnum = #{eb_itemnum}
+   	</update>
+   	
+   	<select id="select_bidcancel_board_info" parameterType="String" resultType="board">
+   		select * from ea_board where eb_itemnum = #{eb_itemnum}
+   	</select>
+   	
+   	<update id="update_bidcancel_board_date" parameterType="board">
+   		update ea_board
+   			set eb_audate = TO_DATE(#{eb_stdate}, 'RR-MM-DDHH24:MI:SS') + 1,
+   				eb_ladate = TO_DATE(#{eb_stdate}, 'RR-MM-DDHH24:MI:SS') + 7
+   			where eb_itemnum = #{eb_itemnum}
+   	</update>
+    
+</mapper>
+
+
+
+
+
+
+
+

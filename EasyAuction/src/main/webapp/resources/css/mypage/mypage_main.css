@@ -1,0 +1,88 @@
+h2 {
+	margin-left:36px;
+	font-size: 40px;
+	
+}
+
+#one {
+	display: inline-block;
+	position: absolute;
+	margin-left: 30px;
+	
+}
+
+#img1 {
+	margin-left: 8px;
+	height: 80px;
+	border: 1px solid gray;
+}
+
+h4 {
+	font-size: 20px;
+	display: inline-block;
+	margin-top: 70px;
+	margin-right: 40px;
+}
+
+.two {
+	margin-bottom: 3px;
+	background: none;
+	border-left: 1px solid #ddd;
+    box-sizing: border-box;
+	width: 10%;
+	height: 30px;
+	font-size: small;
+	color: #b2b2b2;
+	border: #b2b2b2 1px solid;
+}
+
+#three {
+	position: absolute;
+	margin-left:38px;
+	width: 90%;
+	height: 30px;
+	margin-top: 25px;
+}
+#four{
+	position: absolute;
+	margin-top: 80px;
+	width: 95%;
+	left: 38px;
+	padding:0px 100px;
+}
+
+#point {
+	width:400px;
+	margin-left: 25px;
+}
+
+.addpoint {
+	margin-left: 0px;
+	color: blue;
+	text-decoration: none;
+	
+}
+#addpoint{
+	border: #b2b2b2;
+	color: gray;
+}
+.minuspoint {
+	margin-left: 5px;
+	color: blue;
+	text-decoration: none;
+}
+
+
+#order_list {
+	width: 100%;
+	text-align: center;
+	height: 250px;
+}
+
+#_jsDeliveryCorpListHiddenSelBox{
+	font-size: 15px
+}
+
+input#kocn_number.inp_txt{
+	font-size: 15px;
+}

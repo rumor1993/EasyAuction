@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MEMBER1">
+	
+	<!-- 로그인 -->
+	<select id="login_check" parameterType="String" resultType="member">
+		select * from ea_member
+		where em_id = #{em_id}
+			and em_state=1
+	</select>
+
+	<!-- 회원저장 -->
+	<insert id="member_join" parameterType="member">
+	insert into ea_member
+		(em_id, em_pass, em_name, 
+		 em_resid1, em_resid2, em_gender, 
+		 em_phone, em_email, 
+		 em_post, em_address1, em_address2, em_intro, 
+		 em_point, em_account, em_bank, em_date, em_state, em_count)
+		values(#{em_id}, #{em_pass}, #{em_name},
+				#{em_resid1}, #{em_resid2}, #{em_gender},
+				#{em_phone}, #{em_email},
+				#{em_post}, #{em_address1}, #{em_address2}, #{em_intro},
+				0, #{em_account}, #{em_bank}, sysdate, 1, 0)
+	</insert>
+ 	<!-- 아디찾기 -->
+ 	<select parameterType="java.util.Map" id="id_find" resultType="member">
+    select em_id from ea_member where em_name=#{em_name} and em_email=#{em_email} and em_phone=#{em_phone}
+    </select>
+    
+    <!-- 비번찾기 -->
+    <select parameterType="java.util.Map" id="pwd_find" resultType="member">
+    select em_pass from ea_member where em_id=#{em_id} and em_name=#{em_name} and em_phone=#{em_phone}
+    </select>
+    
+    <!-- 회원 수정 -->
+    <update id="member_update" parameterType="member">
+    update ea_member
+    	set em_pass=#{em_pass},
+				em_phone=#{em_phone}, em_email=#{em_email},
+				em_post=#{em_post}, em_address1=#{em_address1}, em_address2=#{em_address2},
+				em_intro=#{em_intro}, em_account=#{em_account}, em_bank=#{em_bank}
+		where em_id=#{em_id}
+    </update>
+    
+    <!-- 회원 탈퇴 -->
+    <delete id="member_delete" parameterType="member">
+    delete from ea_member where em_id=#{em_id}
+    </delete>
+</mapper>
+
+
+
+
+
+
+
+
+

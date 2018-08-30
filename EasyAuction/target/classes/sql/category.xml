@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CATEGORY01">
+    <select id="get_big_category" resultType="category">
+    	select distinct(ey_bigcategory) from ea_category
+    </select>
+    
+    <select id="get_small_category" resultType="category" parameterType="String">
+    	select ey_smallcategory from ea_category
+    	where ey_bigcategory = #{category}
+    </select>
+    
+    <select resultType="int" id="get_category_num" parameterType="category">
+    select ey_categorynum from ea_category
+    where ey_bigcategory = #{ey_bigcategory} and
+    ey_smallcategory = #{ey_smallcategory}
+    </select>
+    
+    <select id="getCategory" resultType="category" parameterType="String">
+ 		select * from ea_category where ey_bigcategory = #{categoryname} 
+ 		
+ 		
+ 		<!-- 
+ 		<where>
+ 		<if test="categoryname!=''">
+ 		</if>
+ 		</where> -->
+ 		 			
+ 	</select>
+ 	
+ 	<select id="getSmallCategory" resultType="category" parameterType="String">
+ 		select * from ea_category where ey_bigcategory = #{cate}
+ 	</select>
+</mapper>
+
+
+
+
+
+
+
+

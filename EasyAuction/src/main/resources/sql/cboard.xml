@@ -1,0 +1,381 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="CBOARD1">
+	<insert id="board_insert" parameterType="board">
+    	insert into ea_board (
+    		eb_itemnum, eb_boardnum, em_id, eb_pass,
+    		eb_kind, eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount, ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+   		)
+    	values(
+    		#{eb_itemnum}, board_seq.nextval, #{em_id}, #{eb_pass},
+    		#{eb_kind}, #{eb_state},#{eb_itemname},#{eb_cont},#{eb_drprice}, 
+    		#{eb_stprice}, #{eb_laprice}, #{eb_madein}, 0, #{ey_categorynum},
+    		#{eb_file, jdbcType=VARCHAR}, #{eb_original, jdbcType=VARCHAR}, 0, (sysdate+1), sysdate , 0, (sysdate+7)
+    	)
+    </insert> 
+    
+     <select id="check_itemnum" parameterType="String" resultType="String">
+ 		select * from ea_board where eb_itemnum = #{eb_itemnum}
+ 	</select>
+    
+    <select id="board_count" resultType="int">
+    	select count(*) from ea_board where eb_kind = '일반'
+    </select>
+    
+    <select id="board_list" parameterType="map" resultType="board">
+ 		<![CDATA[
+		select * from (
+		select rownum rnum,
+    		eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind,
+    		eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount,ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+		from (select * from ea_board where eb_kind = '일반'
+		order by eb_boardnum desc)
+		)
+		where rnum >= ((#{page}-1) * #{limit} + 1) and rnum <= (#{page} * #{limit})
+		]]>
+ 	</select>
+ 	
+ 	<select id="boardList2" resultType="board">
+ 		select * from (
+		select rownum rnum,
+    		eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind,
+    		eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount,ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+		from (select * from ea_board where eb_kind = '일반'
+		order by eb_boardnum desc))
+ 	</select>
+ 	
+ 	 <select id="board_cont" parameterType="String" resultType="board">
+ 		select * from ea_board where eb_itemnum = #{eb_itemnum}
+ 	</select>
+ 	
+ 	<update id="board_hit" parameterType="int">
+ 		update ea_board set eb_hit = eb_hit + 1 where eb_boardnum = #{board_num} and eb_kind = '일반'
+ 	</update>
+ 	
+ 	<select id="board_search_count" parameterType="Map" resultType="int">
+ 		select count(*) from ea_board 
+ 		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''">
+ 				eb_kind = '일반'
+ 			</if>
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 					em_id like #{find_name} and eb_kind = '일반'
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 					eb_itemname like #{find_name} and eb_kind = '일반'
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 					eb_cont like #{find_name} and eb_kind = '일반'
+ 			</if>
+ 			
+ 		</where>
+ 	</select>
+ 	
+ 	<select id="board_search_list" parameterType="Map" resultType="board">
+ 			
+		select * from (
+		select rownum rnum,
+    		eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind,
+    		eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount,ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+		from (select * from ea_board 
+		
+		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''"></if>
+ 			
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 					em_id like #{find_name}
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 					eb_itemname like #{find_name}
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 					eb_cont like #{find_name}
+ 			</if>
+ 		</where>
+ 		
+ 		<if test="orderby==''">
+			order by eb_boardnum desc
+ 		</if>
+ 		
+ 		<if test="orderby=='hit'">
+			order by eb_hit desc
+ 		</if>
+ 		
+ 		<if test="orderby=='old'">
+			order by eb_ladate asc
+ 		</if>
+ 		
+ 		<if test="orderby=='new'">
+			order by eb_ladate desc
+ 		</if>
+ 		
+ 		<if test="orderby=='high'">
+			order by eb_laprice desc
+ 		</if>
+ 		
+ 		<if test="orderby=='row'">
+			order by eb_laprice asc
+ 		</if>
+ 		<![CDATA[
+		)) where eb_kind = '일반' and eb_ladate < sysdate
+		]]>
+ 	</select>
+ 	
+ 	<select id="getsalesCompleteList" parameterType="Map" resultType="board">
+ 			
+		select * from (
+		select rownum rnum,
+    		eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind,
+    		eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount,ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+		from (select * from ea_board 
+		
+		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''"></if>
+ 			
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 					em_id like #{find_name}
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 					eb_itemname like #{find_name}
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 					eb_cont like #{find_name}
+ 			</if>
+ 			 <![CDATA[
+		 eb_kind = '일반' and eb_ladate > sysdate
+		]]>
+ 		</where>
+ 		
+ 		<if test="orderby==''">
+			order by eb_boardnum desc
+ 		</if>
+ 		
+ 		<if test="orderby=='hit'">
+			order by eb_hit desc
+ 		</if>
+ 		
+ 		<if test="orderby=='old'">
+			order by eb_ladate asc
+ 		</if>
+ 		
+ 		<if test="orderby=='new'">
+			order by eb_ladate desc
+ 		</if>
+ 		
+ 		<if test="orderby=='high'">
+			order by eb_laprice desc
+ 		</if>
+ 		
+ 		<if test="orderby=='row'">
+			order by eb_laprice asc
+ 		</if>
+ 		))
+ 	</select>
+ 	
+ 	 	<select id="salesCompleteListConut" parameterType="Map" resultType="int">
+ 		select count(*) from ea_board 
+ 		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''">
+ 			<![CDATA[
+ 				eb_kind = '일반' and eb_ladate < sysdate
+ 			]]>
+ 			</if>
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 			<![CDATA[
+ 					em_id like #{find_name} and eb_kind = '일반'and eb_ladate < sysdate
+ 			]]>
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 			<![CDATA[
+ 					eb_itemname like #{find_name} and eb_kind = '일반' and eb_ladate < sysdate
+ 			]]>
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 			<![CDATA[
+ 					eb_cont like #{find_name} and eb_kind = '일반' and eb_ladate < sysdate
+ 			]]>
+ 			</if>
+ 		</where>
+ 	</select>
+ 	
+ 	<select id="select_buyer" resultType="String" parameterType="String">
+ 		select sh_buyer from ea_shouse where eb_itemnum = #{eb_itemnum} 
+ 	</select>
+ 	
+ 	<!-- 관심수 올리기 -->
+ 	<update id="AttentHit" parameterType="String">
+ 		update ea_board set eb_attcount = eb_attcount + 1 where eb_itemnum = #{num}
+ 	</update>
+ 	
+ 	 	<!-- 관심수 내리기-->
+ 	<update id="AttentHitDown" parameterType="String">
+ 		update ea_board set eb_attcount = eb_attcount - 1 where eb_itemnum = #{num}
+ 	</update>
+ 	
+ 	<update id="bidHit" parameterType="String" >
+ 		update ea_board set eb_bidcount = eb_bidcount + 1 where eb_itemnum = #{num}
+ 	</update>
+ 	
+ 	<update id="boardUpdate" parameterType="Map">
+ 		update ea_board set eb_laprice = #{bidprice} where eb_itemnum = #{itemnum}
+ 	</update>
+ 	
+ 	<update id="LadateUpdate" parameterType="String">
+ 		update ea_board set eb_ladate = eb_ladate + 1/(24*60) where eb_itemnum = #{num}
+ 	</update>
+ 	
+ 	<select id="board_search_count2" resultType="int">
+ 		select count(*) from ea_board
+ 		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''"></if>
+ 				eb_kind = '일반'
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 					em_id like #{find_name} and eb_kind = '일반'
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 					eb_itemname like #{find_name} and eb_kind = '일반'
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 					eb_cont like #{find_name} and eb_kind = '일반'
+ 			</if>
+ 		</where>
+ 		
+ 	</select>
+ 	
+ 	<select id="board_search_list2" resultType="board">
+ 			
+		select * from (
+		select rownum rnum,
+    		eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind,
+    		eb_state, eb_itemname, eb_cont, eb_drprice,
+    		eb_stprice, eb_laprice, eb_madein, eb_bidcount,ey_categorynum,
+    		eb_file, eb_original, eb_hit, eb_audate, eb_stdate, eb_attcount, eb_ladate
+		from (select * from ea_board 
+		
+		<where>
+ 			<!-- 검색 조건이 없는 경우 -->
+ 			<if test="find_field==''"></if>
+ 				
+ 			<!-- 검색 조건이 글쓴이(판매자)인 경우 -->
+ 			<if test="find_field=='em_id'">
+ 					em_id like #{find_name}
+ 			</if>
+ 			
+ 			<!-- 검색 조건이 제목(물품)인경우 -->
+ 			<if test="find_field=='eb_itemname'">
+ 					eb_itemname like #{find_name}
+ 			</if> 			
+ 			
+ 			<!-- 검색 조건이 내용인 경우 -->
+ 			<if test="find_field=='eb_cont'">
+ 					eb_cont like #{find_name}
+ 			</if>
+ 		</where>
+ 		<if test="orderby==''">
+			order by eb_boardnum desc
+ 		</if>
+ 		
+ 		<if test="orderby=='hit'">
+			order by eb_hit desc
+ 		</if>
+ 		
+ 		<if test="orderby=='old'">
+			order by eb_ladate asc
+ 		</if>
+ 		
+ 		<if test="orderby=='new'">
+			order by eb_ladate desc
+ 		</if>
+ 		
+ 		<if test="orderby=='high'">
+			order by eb_laprice desc
+ 		</if>
+ 		
+ 		<if test="orderby=='row'">
+			order by eb_laprice asc
+ 		</if>
+		))
+		
+		<![CDATA[
+		where rnum >= ((#{page}-1) * #{limit} + 1) and rnum <= (#{page} * #{limit})
+		]]>
+		and eb_kind = '일반'
+ 	</select>
+ 	
+ 	<update id="fastPurchaseBuyEnd" parameterType="String">
+ 				update ea_board set eb_ladate = sysdate, eb_audate = sysdate where eb_itemnum = #{eb_itemnum}
+ 	</update>
+ 	
+ 	<select id="getUserPoint" parameterType="String" resultType="int">
+ 		select em_point from ea_member where em_id = #{id}
+ 	</select>
+ 	
+ 	<select id="getCategoryList" parameterType="Map" resultType="board">
+ 		select * from ea_board inner join ea_category on ea_board.ey_categorynum = ea_category.ey_categorynum 
+ 		<where>	
+ 			<if test="bigcategory!='empty'">
+ 			 	ey_bigcategory = #{bigcategory} 	
+ 			</if>
+ 			
+ 			<if test="smallcategory!='empty'">
+ 				ey_smallcategory = #{smallcategory}
+ 			</if>
+ 		</where>
+ 		and ea_board.eb_kind = '일반'
+ 	</select>
+ 	
+ 	<update id="PointDecrease" parameterType="Map">
+ 		update ea_member
+ 		set em_point = (em_point - #{ep_price})
+ 		where em_id = #{user}
+ 	</update>
+ </mapper>
+
+
+
+
+
+
+
+

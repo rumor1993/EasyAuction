@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FAQ1">
+    
+    <!-- 총 게시물 수 -->
+	<select id="faq_listCount" resultType="int">
+		select count(*) from ea_faq
+	</select>
+	
+	<!-- 글 등록 -->
+    <insert id="faq_insert" parameterType="faq">
+ 	insert into ea_faq
+ 	(Ef_NUM, ef_cate, Ef_ADMIN, Ef_SUB, Ef_CONT,
+ 	 EF_FILE, EF_ORIGINAL, EF_DATE)
+ 	 values
+ 	 (EA_FAQ_SEQ.nextval, #{ef_cate}, #{ef_admin}, #{ef_sub}, #{ef_cont},
+ 	#{ef_file, jdbcType=VARCHAR}, #{ef_original, jdbcType=VARCHAR}, sysdate)  
+    </insert>
+    
+    <!-- 리스트 출력 -->
+    <select id="faq_getList" parameterType="Map" resultType="faq">
+    <![CDATA[
+		select * from
+		(select rownum rnum, ef_num, ef_cate, ef_admin, ef_sub, ef_cont,
+		 ef_file, ef_original, ef_date
+		 from (select * from ea_faq
+		 	order by ef_num desc))
+		 where rnum >= ((#{page2} - 1) * #{limit2} + 1)
+			and rnum <= (#{page2} * #{limit2})
+			order by ef_num desc
+    ]]>
+    </select>
+    <!-- 내용수정 -->
+    <select id="faq_cont" parameterType="int" resultType="faq">
+    	select * from ea_faq where ef_num=#{ef_num}
+    </select>
+    
+    <!-- 내용수정확인 -->
+    <update id="faq_edit" parameterType="faq">
+    <![CDATA[
+    update ea_faq
+    set ef_cate=#{ef_cate}, ef_sub= #{ef_sub}, ef_cont = #{ef_cont},
+    	ef_file=#{ef_file}, ef_original=#{ef_original}, ef_date=sysdate
+    where ef_num = #{ef_num}
+     ]]>
+    </update>
+    
+    <!-- 삭제 -->
+    <delete id="faq_delete" parameterType="int">
+    delete from ea_faq
+    where ef_num = #{ef_num}
+    </delete>
+    
+    <!-- 검색 게시물 수 -->
+    <select id="faqfind_cnt" parameterType="java.util.Map" resultType="int">
+    	select count(*) from ea_faq
+    		where ef_sub like #{condition}
+    </select>
+    
+    <!-- 검새 리스트 -->
+    <select id="faqfind_list" parameterType="java.util.Map" resultType="faq">
+    <![CDATA[
+    	select * from
+			(select rownum rnum, ef_num, ef_cate, ef_admin, ef_sub, ef_cont,
+		 			ef_file, ef_original, ef_date
+		 		from (select * from ea_faq
+		 	where ef_sub like #{condition}
+		 	order by ef_num desc))
+		 	where rnum >= ((#{page2} - 1) * #{limit2} + 1)
+			and rnum <= (#{page2} * #{limit2})
+			order by ef_num desc
+    ]]>
+    </select>
+</mapper>
+
+
+
+
+
+
+
+

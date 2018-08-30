@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="BOARD1">
+	
+	<!-- 조회수 증가 -->
+	<update id="board_hit" parameterType="String">
+		update ea_board
+		set eb_hit = eb_hit+1
+		where eb_itemnum = #{itemnum}
+	</update>
+	
+	<insert parameterType="board" id="board_insert">
+	<selectKey keyProperty="eb_boardnum" order="BEFORE" resultType="int">
+	  	select	nvl(max(eb_boardnum),0) + 1
+	  	from	ea_board
+	  </selectKey>
+	insert into ea_board
+	(eb_itemnum, eb_boardnum, em_id, eb_pass, eb_kind, eb_state, eb_itemname,
+	eb_cont, eb_file, eb_original, eb_stprice, eb_madein, eb_hit, eb_choicedate, eb_stdate, ey_categorynum, eb_attcount)
+	values (#{eb_itemnum}, #{eb_boardnum}, #{em_id}, #{eb_pass}, '특별', '대기',
+	#{eb_itemname}, #{eb_cont}, #{eb_file, jdbcType=VARCHAR}, #{eb_original, jdbcType=VARCHAR},
+	#{eb_stprice}, #{eb_madein}, 0, to_date(#{eb_choicedate}, 'RR-MM-DD HH24:MI'), SYSDATE, ${ey_categorynum}, 0)
+	</insert>
+	
+	<!-- 게시물 번호 -->
+	<select id="board_count" resultType="int" parameterType="String">
+		select count(eb_boardnum) from ea_board where eb_kind = '특별'
+		<if test="_parameter.equals('wait')">
+			and eb_state = '대기'
+		</if>
+		<if test="_parameter.equals('checking')">
+			and eb_state = '검증중'
+		</if>
+		<if test="_parameter.equals('finish')">
+			and eb_state = '검증완료'
+		</if>
+		<if test="_parameter.equals('auctionfinish')">
+			and eb_state = '경매완료'
+		</if>
+	</select>
+	
+	<!-- 대기&검증중&완료 리스트 -->
+	<select parameterType="hashmap" id="board_list" resultType="board">
+		select * 
+		from 
+		 (select rownum rnum, eb_itemnum,eb_boardnum, eb_file, em_id, 
+		         eb_kind, eb_state, eb_itemname,
+		         eb_hit,eb_stdate 
+	 	  from  
+	  	   (select * from ea_board where eb_kind = '특별'
+	  	<if test="eb_state == 'wait'">
+			and eb_state = '대기'
+		</if>
+		<if test="eb_state == 'checking'">
+			and eb_state = '검증중'
+		</if>
+		<if test="eb_state == 'finish'">
+			and eb_state = '검증완료'
+		</if>
+		<if test="eb_state == 'auctionfinish'">
+			and eb_state = '경매완료'
+		</if>
+	  	    order by eb_boardnum desc)
+	  	    ) 
+	  	<![CDATA[
+	    where  rnum >= ((#{page}-1) * #{limit} + 1)  
+	       and rnum <= (#{page} * #{limit})
+		]]>
+		<if test="eb_state == 'wait'">
+			and eb_state = '대기'
+		</if>
+		<if test="eb_state == 'checking'">
+			and eb_state = '검증중'
+		</if>
+		<if test="eb_state == 'finish'">
+			and eb_state = '검증완료'
+		</if>
+		<if test="eb_state == 'auctionfinish'">
+			and eb_state = '경매완료'
+		</if>
+	</select>
+	
+	<!-- 의뢰상품 상태 변경 -->
+	<update parameterType="String" id="board_wait">
+		update ea_board
+		<if test="eb_state == '대기'">
+			set eb_state = '검증중' 
+		</if>
+		<if test="eb_state == '검증중'">
+			set eb_state = '검증완료'
+		</if>
+		where eb_itemnum = #{eb_itemnum}
+	</update>
+
+	<delete parameterType="String" id="board_del">
+		delete from ea_board where eb_itemnum=#{eb_itemnum}
+	</delete>
+
+	<update parameterType="board" id="board_edit">
+	update ea_board set eb_pass =#{eb_pass}, eb_itemname =#{eb_itemname}, eb_cont =#{eb_cont},
+	eb_file =#{eb_file, jdbcType=VARCHAR}, eb_original=#{eb_original, jdbcType=VARCHAR},
+	eb_madein = #{eb_madein}, eb_choicedate = #{eb_choicedate}, eb_stprice = #{eb_stprice} where eb_boardnum=#{eb_boardnum}
+	</update>
+	
+	<!-- 오픈준비처리 -->
+    <update id="state_update_open_ready" parameterType="board">
+    	update ea_board
+    	set eb_itemname = #{eb_itemname}, eb_cont = #{eb_cont}, eb_madein = #{eb_madein},
+    	eb_stprice = #{eb_stprice}, eb_audate = to_date(#{eb_audate}, 'YYYY-MM-DD HH24:MI'),
+    	eb_state = '특별오픈준비'
+    	where eb_itemnum = #{eb_itemnum}
+    </update>
+    
+    <!-- 특별경매 오픈리스트 -->
+    <select id="auction_list" resultType="board">
+    	select * from ea_board
+    	where eb_state = '금일오픈' or eb_state = '오픈' and eb_kind = '특별'
+    	order by eb_audate
+    </select>
+
+    <!-- 특별경매 금일오픈으로 변경 -->
+    <update id="today_open" parameterType="String">
+    	update ea_board
+    	set eb_state = '금일오픈'
+    	where eb_itemnum = #{itemnum}
+    </update>
+    
+    <!-- 특별경매 리얼오픈시작 -->
+    <update id="real_open" parameterType="String">
+    	update ea_board
+    	set eb_state = '오픈'
+    	where eb_itemnum = #{itemnum}
+    </update>
+    
+    <!-- 상세보기 -->
+    <select id="auction_info" resultType="board">
+    	select * from ea_board
+    	where eb_itemnum = #{itemnum}
+    </select>
+
+    
+    <!-- 카테고리별로 준비중인 리스트뽑기 -->
+    <select id="category_auction_ready_list" resultType="board" parameterType="hashmap">
+    	select * from ea_board b, ea_category c
+		where b.eb_kind = '특별' and b.eb_state = '특별오픈준비' and
+		<if test="big == null and small == null">
+		b.ey_categorynum = c.ey_categorynum
+		</if>
+		<if test="big != null">
+		b.ey_categorynum = c.ey_categorynum and
+		c.ey_bigcategory = #{big}
+		</if>
+		<if test="small != null">
+		b.ey_categorynum = c.ey_categorynum and
+		c.ey_smallcategory = #{small}
+		</if>
+		<if test="range == 'fastopen'">
+		order by eb_audate
+		</if>
+		<if test="range == 'highprice'">
+		order by eb_stprice
+		</if>
+		<if test="range == 'lowprice'">
+		order by eb_stprice desc
+		</if>
+		<if test="range == 'manyhits'">
+		order by eb_hit desc
+		</if>
+		<if test="range == 'manydibs'">
+		order by eb_attcount desc
+		</if>
+    </select>
+    
+    <update id="basket_increase" parameterType="String">
+    	update ea_board
+    	set eb_attcount = eb_attcount+1
+    	where eb_itemnum = #{eb_itemnum}
+    </update>
+    
+    <update id="basket_decrease" parameterType="String">
+    	update ea_board
+    	set eb_attcount = eb_attcount-1
+    	where eb_itemnum = #{eb_itemnum}
+    </update>
+    
+    <select id="itemnum_increase" resultType="int">
+    	select nvl(count(*),0)+1 from EA_BOARD
+		where (SUBSTR(eb_itemnum,3,6)) = to_char(sysdate, 'RRMMDD') and eb_kind = '특별'
+    </select>
+    
+    <update id="reverify" parameterType="String">
+    	update ea_board
+    	set eb_audate = null, eb_state = '검증중'
+    	where eb_itemnum = #{eb_itemnum}
+    </update>
+    
+    <!-- 특별경매종료 -->
+    <update id="finish" parameterType="String">
+    	update ea_board
+    	set eb_state = '경매완료'
+    	where eb_itemnum = #{itemnum}
+    </update>    
+</mapper>
+
+
+
+
+
+
+
+

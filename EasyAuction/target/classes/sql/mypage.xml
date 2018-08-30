@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Mypage">
+   <select id="select_point" resultType="int"
+      parameterType="String">
+      select EM_POINT from ea_member where EM_ID=#{id}
+   </select>
+
+   <insert id="insert_point" parameterType="Point">
+      insert into EA_POINT
+      values (ea_point_seq.nextval,
+      #{eg_id},#{eg_name},#{eg_recoin},#{eg_orgcoin},#{eg_state},
+      sysdate,#{eg_apply})
+   </insert>
+
+   <select id="select_listcount" resultType="int" parameterType="String">
+      select count(*) from EA_POINT where EG_ID=#{id}
+   </select>
+
+   <select id="select_pointlist" parameterType="map"
+      resultType="Point">   
+   <![CDATA[
+      select * from (select rownum EG_NUM, EG_ID, 
+      EG_NAME, EG_RECOIN,EG_ORGCOIN,EG_STATE, EG_DATE, EG_APPLY 
+      from(select * from EA_POINT order by EG_DATE desc))
+      where EG_NUM >= ((#{page}-1)*#{limit} +1) and EG_NUM <= (#{page} *#{limit}) and EG_ID=#{id}
+   ]]>
+   </select>
+
+   <select id="select_orderlistcount" resultType="int" parameterType="String">
+      select count(*)
+      from EA_PLIST where EP_USER=#{id}
+   </select>
+
+   <select id="select_orderlist" parameterType="map"
+      resultType="plist">   
+   <![CDATA[
+      select * 
+      from (select 
+      rownum EP_NUM, 
+      p.EP_KIND,
+      p.EP_USER, 
+      p.EP_SELLER, 
+      p.EB_BOARDNUM,
+      p.EB_ITEMNUM,
+      p.EB_ITEMNAME,
+      p.EB_FILE, 
+      p.EP_PRICE, 
+      p.EP_DATE,
+      p.EP_RESULT,
+      d.ED_COMPANY,
+      d.ED_DELINUM 
+      from EA_PLIST p full outer join EA_DELIVERY d on p.EB_ITEMNUM = d.EB_ITEMNUM
+      	where EP_USER=#{id} order by EP_DATE desc)
+      where EP_NUM >= ((#{page}-1)*#{limit} +1) and EP_NUM <= (#{page} *#{limit})
+   ]]>
+
+   </select>
+   <update id="update_cancel" parameterType="String">
+      update ea_member set
+      em_count = em_count + 1 where em_id=#{id}
+   </update>
+
+   <update id="update_result_ok" parameterType="map">
+      update EA_PLIST set
+      ep_result = #{result} where EP_USER=#{id} and
+      EB_ITEMNUM=#{itemnum}
+   </update>
+   
+   <select id="select_boardfile_info" parameterType="String" resultType="board">
+   	select * from ea_board where eb_itemnum = #{eb_itemnum}
+   </select>
+   
+   <update id="update_boardfile_date" parameterType="board">
+   		update ea_board
+   			set eb_audate = TO_DATE(#{eb_stdate}, 'RR-MM-DDHH24:MI:SS') + 1,
+   				eb_ladate = TO_DATE(#{eb_stdate}, 'RR-MM-DDHH24:MI:SS') + 7
+   			where eb_itemnum = #{eb_itemnum}
+   </update>
+
+   <select id="select_memberinfo" resultType="member"
+      parameterType="String">
+      select * from ea_member where em_id = #{id}
+   </select>
+
+   <select id="select_pwd" resultType="String"
+      parameterType="String">
+      select em_pass from ea_member where em_id = #{id}
+   </select>
+
+   <update id="update_member" parameterType="member">
+      update ea_member
+      set
+      em_phone=#{em_phone},
+      em_email=#{em_email},
+      em_post=#{em_post},
+      em_address1=#{em_address1},
+      em_address2=#{em_address2},
+      em_intro=#{em_intro},
+      em_bank=#{em_bank},
+      em_account=#{em_account}
+      where
+      em_id = #{em_id}
+   </update>
+
+   <select id="select_likelistcount" resultType="int"
+      parameterType="String">
+      select count(eb_itemnum)
+      from ea_attent
+      where ea_user=#{id}
+   </select>
+
+   <select id="select_likelist" resultType="attent"
+      parameterType="map">
+   <![CDATA[
+      select * from (
+          select rownum ea_num, a.ea_kind, b.eb_file, a.ea_user, a.eb_itemnum, b.eb_itemname, b.eb_laprice, a.ea_date 
+        from ea_attent a , ea_board b where a.eb_itemnum = b.eb_itemnum) where ea_num >= ((#{page}-1)*#{limit} +1) and ea_num <= (#{page} *#{limit})
+      and ea_user=#{id} order by ea_date desc 
+   
+   ]]>
+   </select>
+   
+   <insert id="insert_reasonAdd" parameterType="map">
+    insert into ea_cancel values (cancel_seq.nextval,#{id},#{itemnum},#{reason},#{detail},sysdate)
+   </insert> 
+   
+   <select id="select_listmain1" parameterType="String" resultType="plist">
+   <![CDATA[
+      select * 
+      from (select 
+      rownum EP_NUM, 
+      p.EP_KIND,
+      p.EP_USER, 
+      p.EP_SELLER, 
+      p.EB_BOARDNUM,
+      p.EB_ITEMNUM,
+      p.EB_ITEMNAME,
+      p.EB_FILE, 
+      p.EP_PRICE, 
+      p.EP_DATE,
+      p.EP_RESULT,
+      d.ED_COMPANY,
+      d.ED_DELINUM 
+      from EA_PLIST p full outer join EA_DELIVERY d on p.EB_ITEMNUM = d.EB_ITEMNUM 
+      	where ep_user=#{id} order by EP_DATE desc)
+      where EP_NUM >= 1 and EP_NUM<4
+      ]]>
+   </select>
+   
+   <select id="select_reivewlist" parameterType="map" resultType="review">
+   <![CDATA[
+      select * 
+      from (select 
+      rownum rnum,
+      er_num, 
+      em_id,
+      er_pass, 
+      er_kind, 
+      er_itemnum,
+      er_itemname,
+      er_sub,
+      er_cont, 
+      er_hit, 
+      er_file,
+      er_original,
+      er_date 
+      from(select * from ea_reply where em_id=#{id} order by er_date desc))
+      where rnum >= ((#{page}-1)*#{limit} +1) and rnum <= (#{page} *#{limit})
+   ]]>
+   </select>
+   
+   <select id="select_listcountreview" resultType="int" parameterType="String">
+   select count(*) from ea_reply where em_id = #{id}
+   </select>
+   
+   <select id="select_salelist" parameterType="map" resultType="slist">
+   <![CDATA[
+     select * 
+      from (select 
+      rownum ES_NUM,
+      s.ES_KIND,
+      s.ES_USER, 
+      s.ES_BUYER, 
+      s.EB_BOARDNUM,
+      s.EB_ITEMNUM,
+      s.EB_ITEMNAME,
+      s.EB_FILE, 
+      s.ES_PRICE, 
+      s.ES_DATE,
+      d.ED_COMPANY,
+      d.ED_DELINUM
+      
+      from EA_SLIST s full outer join EA_DELIVERY d on s.EB_ITEMNUM = d.EB_ITEMNUM
+      	where ES_USER=#{id} order by s.ES_DATE desc)
+      where ES_NUM >= ((#{page}-1)*10 +1) and ES_NUM <= (#{page} *#{limit}) 
+   ]]>
+   </select>
+   
+   <select id="select_listcountsale" resultType="int" parameterType="String">
+   select count(*) from EA_SLIST where ES_USER = #{id}
+   </select>
+
+   <insert id="insert_deliverinfo" parameterType="map">
+   insert into EA_DELIVERY values(delivery_seq.nextval,#{recevie_id},#{send_id},#{eb_itemnum},#{ed_company},#{ed_delinum})
+   </insert>
+   
+   <select id="select_listmain2" parameterType="String" resultType="slist">
+   <![CDATA[
+   select * 
+      from (select 
+      rownum ES_NUM,
+      s.ES_KIND,
+      s.ES_USER, 
+      s.ES_BUYER, 
+      s.EB_BOARDNUM,
+      s.EB_ITEMNUM,
+      s.EB_ITEMNAME,
+      s.EB_FILE, 
+      s.ES_PRICE, 
+      s.ES_DATE,
+      d.ED_COMPANY,
+      d.ED_DELINUM
+      
+      from EA_SLIST s full outer join EA_DELIVERY d on s.EB_ITEMNUM = d.EB_ITEMNUM
+      	where ES_USER=#{id} order by s.ES_DATE desc)
+      where ES_NUM >= 1 and ES_NUM < 4
+      ]]>
+   </select>
+   
+   <select id="select_listmain3" parameterType="String" resultType="review">
+   <![CDATA[
+      select * 
+      from (select 
+      rownum rnum,
+      er_num, 
+      em_id,
+      er_pass, 
+      er_kind, 
+      er_itemnum,
+      er_itemname,
+      er_sub,
+      er_cont, 
+      er_hit, 
+      er_file,
+      er_original,
+      er_date 
+      from (select * from ea_reply where em_id=#{id} order by er_date desc))
+      where rnum >= 1 and rnum < 4
+   ]]>
+   </select>
+   <select id="selete_state" resultType="String" parameterType="String">
+   select  EP_RESULT from EA_PLIST where EB_ITEMNUM = #{itemnum}
+   </select>
+   <select id="select_price" parameterType="String" resultType="int">
+   select ep_price from ea_plist where eb_itemnum = #{itemnum}
+   </select>
+   <update id="update_point" parameterType="map">
+   update ea_member set em_point = em_point + #{price} where em_id = #{id}
+   </update>
+   <update id="update_point2" parameterType="map">
+   update ea_member set em_point = em_point - #{price} where em_id = 'admin'
+   </update>
+</mapper>

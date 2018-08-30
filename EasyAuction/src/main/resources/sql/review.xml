@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="REVIEW1">
+   
+   	<!-- 게시판 저장 -->
+	<insert id="review_insert" parameterType="review">
+		insert into ea_reply
+		values
+		(ea_reply_seq.nextval, #{em_id},#{er_pass}, #{er_kind},
+		 #{er_itemnum}, #{er_itemname}, #{er_sub}, #{er_cont}, 0,  
+		 #{er_file, jdbcType=VARCHAR} , #{er_original, jdbcType=VARCHAR}, SYSDATE)
+
+		 
+	</insert>
+
+	<!-- 게시판 총게시물 수 -->
+	<select id="review_count" resultType="int">
+		select count(er_num) from ea_reply
+			</select>
+
+	<!-- 게시판 목록 (page번호를 전달받아서 startRow와 endRow를 구함) -->
+	<select id="review_list" parameterType="hashmap" 
+	        resultType="review">
+	    <![CDATA[
+		select * 
+		from 
+		 (select rownum rnum, er_num, er_kind, er_itemnum,
+		         er_itemname, er_sub, er_file, er_original,
+		         em_id, er_date,
+		         er_hit
+
+	 	  from  
+	  	   (select * from  ea_reply
+	  	     order by er_date desc))
+	  	   
+	
+	    where  rnum >= ((#{page}-1) * #{limit} + 1)  
+	       and rnum <= (#{page} * #{limit})
+		]]>
+		
+	</select>
+
+	<!-- 게시판 내용보기 -->
+	<select id="review_cont" resultType="review" 
+	        parameterType="int">
+		select * from ea_reply
+		where er_num=#{er_num}
+	</select>
+
+	<!-- 게시판 조회수 증가 -->
+	<update id="er_hit" parameterType="int">
+		update ea_reply 
+		set
+		      er_hit=er_hit+1
+		where 
+		      er_num=#{er_num}
+	</update>
+<!-- 게시물 수정 -->
+	<update id="review_edit" parameterType="review">
+		update ea_reply 
+		set
+		   em_id   =#{em_id},
+		   er_sub=#{er_sub},
+		   er_cont=#{er_cont},
+		   er_file	  =#{er_file, jdbcType=VARCHAR},
+		   er_original=#{er_original, jdbcType=VARCHAR}
+		where er_num=#{er_num}
+	</update>
+	
+		<!-- 게시물 삭제 -->
+	<delete id="review_del" parameterType="int">
+		delete from ea_reply 
+		where  er_num=#{er_num}
+	</delete>
+	
+	<select id="review_search_list" parameterType="hashmap" 
+	        resultType="review">
+	    
+		select * 
+		from 
+		 (select rownum rnum, 
+		 		er_num,em_id, er_sub, er_cont,
+		 		er_kind, er_itemnum, er_itemname,
+		        er_file, er_original,
+		        er_hit,  er_date 
+	 	  from  
+	  	   (select * from ea_reply
+	  	   
+	  	   
+	  	    <where>
+				<!-- * 검색조건이 없는 경우 -->
+					<if test="find_field==''">
+					</if>
+				<!-- * 검색조건이 글쓴이인 경우 -->
+					<if test="find_field=='em_id'">
+					em_id like '%' || #{find_name} ||'%'
+					</if>
+				<!-- * 검색조건이 제목인 경우 -->
+					<if test="find_field=='er_sub'">
+						er_sub like '%' || #{find_name} ||'%'
+					</if>
+					
+			</where>
+			<![CDATA[
+	  	    )
+	  	  ) 
+	    where  rnum >= ((#{page}-1) * #{limit} + 1)  
+	       and rnum <= (#{page} * #{limit})
+	       
+		]]>
+	</select>
+	<!-- 게시판 검색게시물 수 -->
+	<select id="review_search_count" parameterType="hashmap"
+	resultType="int">
+		select count(er_num) from ea_reply
+					<where>
+				<!-- * 검색조건이 없는 경우 -->
+					<if test="find_field==''">
+					</if>
+				<!-- * 검색조건이 글쓴이인 경우 -->
+					<if test="find_field=='em_id'">
+					em_id like '%' || #{find_name} ||'%'
+					</if>
+				<!-- * 검색조건이 제목인 경우 -->
+					<if test="find_field=='er_sub'">
+						er_sub like '%' || #{find_name} ||'%'
+					</if>
+			
+			</where>
+		</select>
+</mapper>
+
+
+
+
+
+
+
+

@@ -1,0 +1,87 @@
+@charset "UTF-8";
+
+.nbutton5, .nbutton6, .nbutton7, .nbutton8, .nbutton9 {
+	width: 200px;
+	height: 30px;
+	padding-left: 10px;
+	font-size: 18px;
+	color: #f5450dcf;
+	border: 1px solid #f5450dcf;
+	border-radius: 3px;
+	background-color: white;
+	cursor:pointer;
+	vertical-align:baseline !important;
+}
+#em_resid1, #em_resid2{
+	width:100px !important;
+	margin-bottom: 0px !important;
+}
+#myform {
+	font-family: Arial, Helvetica, sans-serif;
+	margin-left:10% !important;
+	display: inline-block;
+}
+tr{
+	height:25px !important;
+	line-height:40px;
+	
+	vertical-align: middle !important;
+}
+textarea{
+	resize:none;
+	width:500px !important;
+	border: 1px solid #f5450dcf !important;
+}
+#join_menu{
+	text-align:center
+}
+button:focus{
+   outline:none;
+}
+.input_box1{
+	border: 1px solid #f5450dcf !important;
+	border-radius: 5px !important;
+	height: 25px !important;
+	padding:1px !important;
+	width:180px !important;
+}
+
+.join_title{
+	margin-left:10%;
+}
+form {
+    background-color: #fefefe;
+    margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+    width: 80%; /* Could be more or less, depending on screen size */
+    padding: 16px;
+}
+select {
+	width: 80px !important;
+	height: 30px !important;
+	padding-left: 10px !important;
+	font-size: 18px !important;
+	color: #f5450dcf !important;
+	border: 1px solid #f5450dcf !important;
+	border-radius: 3px !important;
+	vertical-align: middle !important;
+	margin-bottom: 0px !important;
+	text-align:center;
+}
+#em_phone2, #em_phone3{
+	border: 1px solid #f5450dcf !important;
+	border-radius: 5px !important;
+	height: 25px !important;
+	padding:1px !important;
+	width:60px !important;
+}
+hr {
+    border: 1px solid #808080;
+    margin-bottom: 25px;
+}
+#join_table{
+    border-spacing: 10px;
+    empty-cells:show;
+    width:90%;
+    text-align:left;
+}
+

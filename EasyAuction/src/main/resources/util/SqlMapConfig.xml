@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+<!-- join_file=#{join_file, jdbcType=VARCHAR} ,join_original=#{join_original, jdbcType=VARCHAR} 
+     join_file=#{join_file}, join_original=#{join_original} -->
+     
+     <settings>
+       <setting name="jdbcTypeForNull" value="NULL"/>    
+    </settings>
+    
+	<typeAliases>
+		 <typeAlias alias="member"  
+		            type="com.easy.auction.model.MemberBean" />	
+		 <typeAlias alias="board" 
+		            type="com.easy.auction.model.BoardBean" />
+		 <typeAlias alias="attent" 
+		            type="com.easy.auction.model.Attent" />
+		 <typeAlias alias="chat" 
+		            type="com.easy.auction.model.Chat" />
+		 <typeAlias alias="delivery" 
+		            type="com.easy.auction.model.Delivery" />
+		 <typeAlias alias="ghouse" 
+		            type="com.easy.auction.model.GHouse" />
+		 <typeAlias alias="shouse" 
+		            type="com.easy.auction.model.SHouse" />
+		 <typeAlias alias="shlist" 
+		            type="com.easy.auction.model.SHouseList" />
+		 <typeAlias alias="slist" 
+		            type="com.easy.auction.model.SList" />
+		 <typeAlias alias="plist" 
+		            type="com.easy.auction.model.PList" />
+		 <typeAlias alias="faq" 
+		            type="com.easy.auction.model.FAQ" />
+		 <typeAlias alias="notice" 
+		            type="com.easy.auction.model.Notice" />
+		 <typeAlias alias="review" 
+		            type="com.easy.auction.model.Review" />	
+		 <typeAlias alias="letter"
+		 			type="com.easy.auction.model.Letter" />	
+		 <typeAlias alias="point"
+		 			type="com.easy.auction.model.Point" />	
+		 <typeAlias alias="category"
+		 			type="com.easy.auction.model.Category" />
+		 <typeAlias alias="Point"
+		 			type="com.easy.auction.model.Point"/>
+		 <typeAlias alias="cancel"
+		 			type="com.easy.auction.model.Cancel" />
+	</typeAliases>
+	
+ 
+	<mappers>
+		<mapper resource="sql/admin.xml" />
+		<mapper resource="sql/attent.xml" />
+		<mapper resource="sql/board.xml" />
+		<mapper resource="sql/cboard.xml" />
+		<mapper resource="sql/chat.xml" />
+		<mapper resource="sql/delivery.xml" />
+		<mapper resource="sql/ghouse.xml" />
+		<mapper resource="sql/member.xml" />
+		<mapper resource="sql/notice.xml" />
+		<mapper resource="sql/plist.xml" />
+		<mapper resource="sql/faq.xml" />
+		<mapper resource="sql/review.xml" />
+		<mapper resource="sql/shouse.xml" />
+		<mapper resource="sql/slist.xml" />
+		<mapper resource="sql/letter.xml" />
+		<mapper resource="sql/category.xml" />
+		<mapper resource="sql/mypage.xml" />
+	</mappers>
+
+</configuration>
+
+
+
+
+
+
+
+
+
+
+

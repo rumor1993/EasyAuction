@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="LETTER1">
+
+	<select id="laprice_confirm" parameterType="String" resultType="board">
+		select * from ea_board where em_id = #{em_id}
+			and eb_laprice is not null
+	</select>
+
+	<select id="select_bideduser" parameterType="board" resultType="ghouse">
+		select g.* from ea_board b full outer join ea_ghouse g
+			on b.eb_itemnum = g.eb_itemnum
+			where b.eb_itemnum = #{eb_itemnum}
+				and b.eb_laprice = #{eb_laprice}
+				and b.em_id = #{em_id}
+	</select>
+	
+	<select id="list_messageview" parameterType="String" resultType="letter">
+		select * from ea_letter 
+			where el_response = #{el_response} 
+			and el_confirm is null
+	</select>
+	
+	<update id="update_messageconfirm" parameterType="letter">
+		update ea_letter
+			set el_confirm = #{el_confirm}
+			where eb_itemnum = #{eb_itemnum}
+			and el_request = #{el_request}
+			and el_response = #{el_response}
+	</update>
+</mapper>
+
+
+
+
+
+
+
+

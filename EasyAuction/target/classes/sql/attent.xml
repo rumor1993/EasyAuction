@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+ <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ATTENT1">
+    <insert id="product_basket" parameterType="attent">
+    	insert into ea_attent 
+    	values(
+    	basket_seq.nextval, #{ea_kind}, #{ea_user},
+   			 #{eb_itemnum}, sysdate )
+    </insert>
+    
+    <!-- 값 가져오기 -->
+    <select id="getattent" parameterType="Map" resultType="attent">
+    	select * from ea_attent where eb_itemnum = #{eb_itemnum} and ea_user = #{user}
+    </select>  
+    
+    <!-- 관심 수 가져오기 -->
+    <select id="getattentcount" parameterType="String" resultType="attent">
+    	select * from ea_attent where eb_itemnum = #{eb_itemnum}
+    </select>  
+    
+    <select id="attentCheck" parameterType="Map" resultType="int">
+    	select count(*) from ea_attent where ea_user = #{ea_user} and eb_itemnum = #{eb_itemnum}
+    </select>
+    
+    <delete id="attentDelete">
+    	delete ea_attent where eb_itemnum = #{eb_itemnum} and ea_user = #{ea_user}
+    </delete>
+    
+    <insert id="basket_insert" parameterType="attent">
+	  <selectKey keyProperty="ea_num" order="BEFORE" resultType="int">
+	  	select	nvl(max(ea_num),0) + 1
+	  	from	ea_attent
+	  </selectKey>
+		insert into ea_attent
+		values(#{ea_num}, #{ea_kind}, #{ea_user}, #{eb_itemnum}, sysdate)
+	</insert>
+	
+	<select id="basket_check" parameterType="attent" resultType="attent">
+		select * from EA_ATTENT
+		where ea_user = #{ea_user} and
+		eb_itemnum = #{eb_itemnum}
+	</select>
+	
+	<delete id="basket_cancel" parameterType="attent">
+		delete from ea_attent
+		where ea_user = #{ea_user} and
+		eb_itemnum = #{eb_itemnum}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
